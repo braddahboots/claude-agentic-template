@@ -1,0 +1,61 @@
+# Project Configuration
+
+## Quick Reference
+- **Template Version**: 1.0.0
+- **Bootstrap Status**: Check if `PRD.md` exists and `.claude/rules/` contains domain-specific rules
+- **Codebase Map**: See `CODEBASE_OVERVIEW.md` — read before modifying any file, update after structural changes
+
+## Core Principles
+
+### Three-Layer Enforcement Model
+1. **Memory** (`MEMORY.md`) — Cross-session learnings. First 200 lines auto-loaded. Learning layer.
+2. **Rules** (`.claude/rules/`) — Active instructions. Always-on globals + path-matched domain rules. Instruction layer.
+3. **Hooks** (`.claude/scripts/`) — Shell scripts on lifecycle events. Cannot be skipped. Guarantee layer.
+
+**Escalation path**: If an AI mistake happens once → add to memory. If it recurs → promote to a rule. If it's dangerous → enforce with a hook.
+
+### Source-of-Truth Hierarchy
+When information conflicts, resolve using this priority order:
+1. **Compiler/type-checker output** — highest authority (deterministic)
+2. **Truth file** (`*-truth.md`) — auto-generated from type definitions
+3. **Official documentation** (via MCP or web)
+4. **Rules** (`.claude/rules/`)
+5. **Memory** (`.claude/memory/MEMORY.md`)
+6. **AI training knowledge** — lowest authority (may hallucinate)
+
+### Scope Discipline
+- **Only modify files explicitly relevant to the current task**
+- **Never add features that weren't requested**
+- **If a change requires modifying more than 3 files, pause and confirm the plan with the user**
+- **Read CODEBASE_OVERVIEW.md before touching any file** to understand dependencies
+
+### Verification Protocol
+Before using any SDK/framework API:
+1. Check the truth file for existence (cite file + line number)
+2. If not in truth file, check official docs via MCP or web
+3. If still uncertain, ask the user — never guess
+4. After implementation, the post-edit hook will verify imports automatically
+
+## Available Skills
+- `/bootstrap` — Analyze a PRD and generate domain-specific .claude configuration
+- `/commit` — Stage, validate, and commit with conventional commit format
+- `/validate` — Run the full validation pipeline (type-check + truth-file cross-reference)
+- `/plan-feature` — Decompose a complex feature into sequenced implementation steps
+- `/review` — Trigger the code-reviewer agent on recent changes
+
+## Available Agents
+- `bootstrap-orchestrator` — Reads PRD, generates domain-specific agents/rules/hooks/skills
+- `code-reviewer` — Reviews code for correctness, type safety, scope. Reports only, does NOT fix.
+- `implementer` — Implements features. The main workhorse. Reads truth file first.
+- `devops` — Git operations, commits, CI/CD. Lightweight procedural tasks.
+
+## Project-Specific Configuration
+> After running `/bootstrap`, this section will be populated with domain-specific details.
+> Until then, this is a template awaiting initialization.
+
+- **Tech Stack**: [populated by bootstrap]
+- **Primary SDK/Framework**: [populated by bootstrap]
+- **Truth File Location**: [populated by bootstrap]
+- **Build Command**: [populated by bootstrap]
+- **Test Command**: [populated by bootstrap]
+- **Lint Command**: [populated by bootstrap]
