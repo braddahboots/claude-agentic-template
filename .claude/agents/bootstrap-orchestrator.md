@@ -74,17 +74,23 @@ Adapt the hook scripts in `.claude/scripts/`:
   - Rust → `cargo check`
   - Go → `go vet`
   - Also add truth-file cross-reference if a truth file exists
+  - **IMPORT_PATTERN must be simple and portable** — use basic `grep -oP` patterns like `"from 'sdk-name'"`. Avoid complex lookbehinds that may not work across grep versions.
 - **session-start.sh** — Populate with the most critical facts about the SDK/framework that are likely to be hallucinated. Research the SDK docs via web to identify common misconceptions.
 - **session-stop.sh** — Configure file extensions and uncommitted change detection for the tech stack
 
 ### Step 4: Generate Truth File (if applicable)
 
 If the project uses a typed SDK or framework:
-1. Check if type definitions exist (`.d.ts`, `.pyi`, type stubs)
-2. If yes, create or adapt `scripts/generate-truth-file.sh` to parse them
-3. Generate the truth file and place it at the project root as `[sdk-name]-truth.md`
-4. Add a rule pointing to the truth file
-5. Configure the post-edit hook to cross-reference imports against it
+1. **Auto-detect** the type definition file. Do NOT guess the path — use `find` or `Glob` to locate it:
+   - TypeScript: `find node_modules/[sdk-name] -name "*.d.ts" -maxdepth 3` (look for the main `.d.ts` — it may be at the package root like `server.d.ts`, or in `dist/`, `types/`, or `lib/`)
+   - Python: Look for `.pyi` stubs or `py.typed` marker
+   - Rust: Check `Cargo.toml` for the crate's public API
+2. If found, run `scripts/generate-truth-file.sh <actual-path> [sdk-name]-truth.md --format [ts|python|rust]`
+3. Add a rule pointing to the truth file
+4. Configure the post-edit hook to cross-reference imports against it
+5. Document the exact regeneration command in CLAUDE.md so the user can re-run after SDK updates
+
+**Critical:** The type definition file path varies between SDKs. Never hardcode `dist/index.d.ts` — always detect the actual path first.
 
 If the project doesn't use a typed SDK, skip this step and note in CLAUDE.md that the truth file pattern is not applicable.
 

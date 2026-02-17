@@ -14,26 +14,42 @@ This repo provides a complete `.claude/` configuration that implements a **three
 
 **Escalation path:** If an AI mistake happens once, add to memory. If it recurs, promote to a rule. If it's dangerous, enforce with a hook.
 
+## Prerequisites
+
+- [Claude Code](https://claude.ai/claude-code) CLI
+- **`jq`** — Required by hook scripts to parse JSON tool input
+  - macOS: `brew install jq`
+  - Ubuntu/Debian: `sudo apt install jq`
+  - Windows: `choco install jq` or download from [jqlang/jq](https://github.com/jqlang/jq/releases)
+- Git
+- Project-specific build tools (configured during bootstrap)
+
 ## Quick Start
 
-1. **Clone this repo** into your project root (or copy the `.claude/` directory):
+> **Important workflow order:** Initialize your project first → Copy template → Write PRD → Run `/bootstrap`. The bootstrap agent needs your installed dependencies to locate type definitions and generate the truth file.
+
+1. **Initialize your project first** — Set up your project using your framework's CLI (e.g., `hytopia init`, `npx create-next-app`, `cargo init`). The template should be applied *after* your project scaffolding exists.
+
+2. **Clone this repo** and copy the infrastructure into your project:
    ```bash
    git clone <this-repo-url> .claude-infra
    cp -r .claude-infra/.claude .
    cp .claude-infra/CLAUDE.md .
    cp .claude-infra/CODEBASE_OVERVIEW.md .
+   cp -r .claude-infra/templates .
+   cp -r .claude-infra/scripts .
    ```
 
-2. **Write your PRD** — Describe your product, tech stack, architecture, key entities, and risk areas. See `examples/` for format and detail level.
+3. **Write your PRD** — Describe your product, tech stack, architecture, key entities, and risk areas. See `examples/` for format and detail level.
 
-3. **Place PRD at project root** as `PRD.md`
+4. **Place PRD at project root** as `PRD.md`
 
-4. **Run Claude Code** and invoke `/bootstrap`
+5. **Run Claude Code** and invoke `/bootstrap`
 
-5. The bootstrap agent will:
+6. The bootstrap agent will:
    - Analyze your PRD
    - Generate domain-specific rules, agents, hooks, and skills
-   - Generate a truth file from your SDK's type definitions (if applicable)
+   - Auto-detect your SDK's type definition file (`.d.ts`, `.pyi`, etc.) and generate a truth file
    - Configure build/lint/test commands
    - Initialize memory with SDK-specific gotchas
 
@@ -115,10 +131,4 @@ After the initial bootstrap, refine your setup as you develop:
 | `/commit` | Validate and commit with conventional format |
 | `/validate` | Full validation pipeline (type-check + truth file + lint) |
 | `/plan-feature` | Decompose a feature into sequenced implementation steps |
-
-## Requirements
-
-- [Claude Code](https://claude.ai/claude-code) CLI
-- `jq` (used by hook scripts to parse tool input)
-- Git
-- Project-specific build tools (configured during bootstrap)
+| `/review` | Trigger code-reviewer agent on recent changes |

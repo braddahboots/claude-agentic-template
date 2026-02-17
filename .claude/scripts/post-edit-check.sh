@@ -3,6 +3,12 @@
 # Runs after every file write/edit
 # Configure the FILE_EXTENSION, BUILD_CMD, and TRUTH_FILE for your project
 
+# Verify jq is available (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+  echo "WARNING: jq is not installed. Hook scripts require jq to parse tool input. Install with: brew install jq (macOS), apt install jq (Linux), choco install jq (Windows)"
+  exit 0
+fi
+
 # Read tool input from stdin
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null)
@@ -17,7 +23,7 @@ fi
 FILE_EXTENSIONS=(".ts" ".tsx")  # Extensions to check
 BUILD_CMD="npx tsc --noEmit"    # Type-check / compile command
 TRUTH_FILE=""                    # Path to truth file (empty = skip truth check)
-IMPORT_PATTERN=""                # Regex to extract imports (e.g., "from 'hytopia'")
+IMPORT_PATTERN=""                # Regex to extract imports — keep simple (e.g., "from 'sdk-name'" not complex lookbehinds). Must work with grep -oP.
 
 # ============================================
 # Check if file matches configured extensions

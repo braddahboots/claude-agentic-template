@@ -2,6 +2,12 @@
 # PreToolUse hook: Block dangerous commands
 # Exit 0 = allow, Exit 2 = block
 
+# Verify jq is available (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+  # Without jq we can't parse the command — allow through but warn
+  exit 0
+fi
+
 # Read tool input from stdin
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

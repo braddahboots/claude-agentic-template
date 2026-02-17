@@ -31,6 +31,7 @@
 - `commit/SKILL.md` — `/commit` — Validate and commit with conventional format
 - `validate/SKILL.md` — `/validate` — Full validation pipeline
 - `plan-feature/SKILL.md` — `/plan-feature` — Decompose features into steps
+- `review/SKILL.md` — `/review` — Trigger code-reviewer agent on recent changes
 
 ### `.claude/scripts/` — Hook Scripts (Deterministic)
 - `block-dangerous-commands.sh` — [PreToolUse] Blocks rm -rf, force push, etc.
