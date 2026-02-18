@@ -56,3 +56,5 @@
 
 ## `scripts/` — Utility Scripts
 - `generate-truth-file.sh` — Generates truth file from type definitions
+- `verify-setup.sh` — Verifies .claude infrastructure is properly set up (files, dirs, permissions, bootstrap status)
+- `bootstrap-manual.md` — Fallback guide for manual bootstrap when /bootstrap skill is unavailable
