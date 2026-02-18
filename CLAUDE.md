@@ -13,8 +13,8 @@ Each type of content has exactly one owner. When information conflicts or you're
 
 | Content | Owned by | Read by |
 |---------|----------|---------|
-| Requirements (what to build) | `PRD.md` | agents, `/plan-feature` |
-| Status, milestones, decisions, open questions | `ROADMAP.md` | agents, `/status`, `/plan-feature` |
+| Requirements (what to build) | `PRD.md` | agents, `/plan`, `/plan-feature` |
+| Status, milestones, decisions, open questions | `ROADMAP.md` | agents, `/status`, `/plan`, `/milestone` |
 | Behavioral constraints (what NOT to do) | `.claude/rules/` | agents during implementation |
 | Cross-session learnings | `.claude/memory/MEMORY.md` | agents (auto-loaded first 200 lines) |
 | File structure & purposes | `CODEBASE_OVERVIEW.md` | agents before any file modification |
@@ -63,9 +63,13 @@ Before using any SDK/framework API:
 - `/bootstrap` — Analyze a PRD and generate domain-specific .claude configuration
 - `/commit` — Stage, validate, and commit with conventional commit format
 - `/validate` — Run the full validation pipeline (type-check + truth-file cross-reference)
-- `/plan-feature` — Decompose a complex feature into sequenced implementation steps
+- `/plan` — Roadmap-level "what's next" — recommends the highest-priority task from ROADMAP.md
+- `/plan-feature` — Code-level decomposition — breaks a specific feature into sequenced steps
+- `/milestone` — Update ROADMAP.md — check off tasks, record decisions, advance milestones
 - `/review` — Trigger the code-reviewer agent on recent changes
 - `/status` — Show current milestone, recent activity, open questions from ROADMAP.md
+
+**Skill hierarchy:** `/plan` decides WHAT to work on next, `/plan-feature` decides HOW to implement it, `/milestone` records progress.
 
 ## Available Agents
 - `bootstrap-orchestrator` — Reads PRD, generates domain-specific agents/rules/hooks/skills

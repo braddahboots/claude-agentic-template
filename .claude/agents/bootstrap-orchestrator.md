@@ -27,6 +27,8 @@ Read the PRD carefully and extract:
 
 Using the analysis, generate the following files. Use templates from `templates/` as starting points, replacing placeholders with domain-specific content.
 
+**Important:** The `templates/` and `examples/` directories are reference material for this template repo. They should NOT exist in the user's project. If you find them in the project root, do NOT read from or depend on them being present — they may not have been copied. Read templates from the `.claude-infra/templates/` clone directory if needed, or inline the content directly.
+
 ### Step 1: Generate Rules
 
 **CRITICAL: Do NOT create a rule file for every domain area in the PRD.** Over-generating rules front-loads implementation guidance before any code exists, duplicates the PRD, and creates drift risk. Rules are earned through the escalation path (memory → rules → hooks), not pre-generated.
@@ -107,14 +109,19 @@ If the project uses a typed SDK or framework:
 
 If the project doesn't use a typed SDK, skip this step and note in CLAUDE.md that the truth file pattern is not applicable.
 
-### Step 5: Generate Skills
+### Step 5: Configure Skills
 
-Adapt the slash-command skills:
+Adapt the slash-command skills that need project-specific configuration:
 
-- `/commit` — Already universal, but configure the validation step for the project's build command
+- `/commit` — Configure the validation step for the project's build command
 - `/validate` — Configure for the project's type-checker, linter, and truth file
-- `/plan-feature` — Already universal
 - `/review` — Trigger code-reviewer with project-specific review criteria
+
+The following skills are already universal and need no changes:
+- `/plan` — Roadmap-level "what's next" (reads ROADMAP.md, recommends next task)
+- `/plan-feature` — Code-level decomposition (breaks a feature into implementation steps)
+- `/milestone` — Updates ROADMAP.md (the only skill that writes to it)
+- `/status` — Read-only project status pulse check
 
 ### Step 6: Initialize Memory
 
