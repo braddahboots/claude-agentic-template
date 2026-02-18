@@ -7,12 +7,35 @@
 
 ## Core Principles
 
+### File Ownership
+
+Each type of content has exactly one owner. When information conflicts or you're unsure where something belongs, use this table:
+
+| Content | Owned by | Read by |
+|---------|----------|---------|
+| Requirements (what to build) | `PRD.md` | agents, `/plan-feature` |
+| Status, milestones, decisions, open questions | `ROADMAP.md` | agents, `/status`, `/plan-feature` |
+| Behavioral constraints (what NOT to do) | `.claude/rules/` | agents during implementation |
+| Cross-session learnings | `.claude/memory/MEMORY.md` | agents (auto-loaded first 200 lines) |
+| File structure & purposes | `CODEBASE_OVERVIEW.md` | agents before any file modification |
+| SDK/framework API reference | `*-truth.md` | agents, post-edit hooks |
+
 ### Three-Layer Enforcement Model
 1. **Memory** (`MEMORY.md`) — Cross-session learnings. First 200 lines auto-loaded. Learning layer.
 2. **Rules** (`.claude/rules/`) — Active instructions. Always-on globals + path-matched domain rules. Instruction layer.
 3. **Hooks** (`.claude/scripts/`) — Shell scripts on lifecycle events. Cannot be skipped. Guarantee layer.
 
-**Escalation path**: If an AI mistake happens once → add to memory. If it recurs → promote to a rule. If it's dangerous → enforce with a hook.
+### Escalation Path — Rules Are Earned, Not Pre-Generated
+
+```
+AI mistake happens once       → add to MEMORY.md
+Same mistake recurs           → promote to a rule in .claude/rules/
+Mistake is dangerous/critical → enforce with a hook in .claude/scripts/
+```
+
+Domain-specific rules should emerge organically through this path. The bootstrap only generates universal rules + one SDK rule. All other rules are created when patterns prove they need enforcement.
+
+**The Rule Litmus Test:** Rule files must contain ONLY behavioral constraints — never requirements, implementation plans, or open questions. If deleting a rule wouldn't make the agent produce worse code, it doesn't belong.
 
 ### Source-of-Truth Hierarchy
 When information conflicts, resolve using this priority order:
@@ -42,6 +65,7 @@ Before using any SDK/framework API:
 - `/validate` — Run the full validation pipeline (type-check + truth-file cross-reference)
 - `/plan-feature` — Decompose a complex feature into sequenced implementation steps
 - `/review` — Trigger the code-reviewer agent on recent changes
+- `/status` — Show current milestone, recent activity, open questions from ROADMAP.md
 
 ## Available Agents
 - `bootstrap-orchestrator` — Reads PRD, generates domain-specific agents/rules/hooks/skills

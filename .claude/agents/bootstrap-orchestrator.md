@@ -27,9 +27,30 @@ Read the PRD carefully and extract:
 
 Using the analysis, generate the following files. Use templates from `templates/` as starting points, replacing placeholders with domain-specific content.
 
-### Step 1: Generate Domain Rules
+### Step 1: Generate Rules
 
-For each major domain area identified in the PRD, create a path-matched rule file in `.claude/rules/`:
+**CRITICAL: Do NOT create a rule file for every domain area in the PRD.** Over-generating rules front-loads implementation guidance before any code exists, duplicates the PRD, and creates drift risk. Rules are earned through the escalation path (memory → rules → hooks), not pre-generated.
+
+Generate ONLY these categories of rules:
+
+1. **Universal rules** (copy/adapt from `.claude/rules/` if not already present):
+   - `validation-protocol.md` — How to verify SDK facts
+   - `scope-discipline.md` — Scope control
+   - `codebase-maintenance.md` — Keep CODEBASE_OVERVIEW.md current
+   - `coding-standards.md` — Project-specific coding standards derived from tech stack
+
+2. **SDK/framework rule** (ONE file, not per-domain):
+   - `[sdk-name]-sdk.md` — Constraints for using the primary SDK/framework correctly
+   - This is the only domain-specific rule file generated at bootstrap time
+
+**The Rule Litmus Test — apply to every rule you write:**
+> Rule files must contain ONLY behavioral constraints — never requirements, implementation plans, or open questions.
+> - **Requirements** belong in `PRD.md`
+> - **Implementation plans** belong in `/plan-feature` output
+> - **Open questions and decisions** belong in `ROADMAP.md`
+> - **Constraints** (what NOT to do, guardrails, patterns to enforce) belong in rules
+>
+> If deleting a rule wouldn't make the agent produce worse code, it doesn't belong.
 
 **Format for each rule file:**
 ```yaml
@@ -39,19 +60,11 @@ paths:
 ---
 ```
 
-Each rule must include:
-- Core principles for that domain area
-- Available SDK/framework features (with version notes)
-- Verified working code examples (if you can confirm them via docs)
-- Common mistakes the AI might make
+SDK/framework rule must include:
+- Behavioral constraints for using the SDK correctly
+- Common mistakes the AI must avoid (with version notes)
 - Links to official documentation
-
-Always generate these universal rules (copy from `.claude/rules/` if not already present):
-- `source-of-truth.md` — Truth hierarchy
-- `validation-protocol.md` — How to verify SDK facts
-- `scope-discipline.md` — Scope control
-- `codebase-maintenance.md` — Keep CODEBASE_OVERVIEW.md current
-- `coding-standards.md` — Project-specific coding standards derived from tech stack
+- Do NOT include: feature lists, implementation suggestions, or PRD requirements
 
 ### Step 2: Generate Domain Agents
 
@@ -121,9 +134,19 @@ Update the CLAUDE.md "Project-Specific Configuration" section with:
 - Truth file location
 - Build/test/lint commands
 - Key entities and architecture
-- Links to any domain-specific rules generated
+- The SDK rule generated (should be only one)
 
-### Step 8: Initialize CODEBASE_OVERVIEW.md
+### Step 8: Initialize ROADMAP.md
+
+Create `ROADMAP.md` at the project root with:
+- Current milestone (MVP or first milestone from PRD)
+- Key decisions made during bootstrap (tech stack, architecture pattern)
+- Open questions extracted from the PRD (things that need clarification)
+- A "Completed" section (empty initially)
+
+**Important:** Move any open questions or decision records OUT of rule files and INTO ROADMAP.md. Rules are for constraints only.
+
+### Step 9: Initialize CODEBASE_OVERVIEW.md
 
 Create `CODEBASE_OVERVIEW.md` with:
 - The current file structure
@@ -133,10 +156,11 @@ Create `CODEBASE_OVERVIEW.md` with:
 ## Output
 
 After generation, print a summary:
-- Number of domain rules generated
+- Rules generated (should be universals + ONE SDK rule only)
 - Number of agents generated
 - Hook configurations applied
 - Whether a truth file was generated
+- Whether ROADMAP.md was initialized (with open questions count)
 - Any manual steps the user needs to take (e.g., "Run `npm run gen:truth` to regenerate the truth file after SDK updates")
 
 ## Critical Constraints
@@ -145,3 +169,6 @@ After generation, print a summary:
 - **Cite your sources** — When populating rules with SDK facts, note where you found the information
 - **Prefer under-generation to over-generation** — It's better to generate fewer, accurate rules than many hallucinated ones
 - **Always include version numbers** for SDK-specific claims so they can be re-verified after upgrades
+- **Rules are constraints, not requirements** — Apply the litmus test to every rule. If it reads like a feature description or implementation plan, it belongs in PRD.md or ROADMAP.md, not in a rule file
+- **Generate only ONE SDK rule file** — Do not create per-domain rule files. Domain rules should emerge organically through the escalation path (memory → rules → hooks) as the project develops
+- **Separate concerns between files** — Requirements stay in PRD.md, decisions and status in ROADMAP.md, constraints in rules, learnings in MEMORY.md
