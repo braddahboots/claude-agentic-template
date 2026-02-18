@@ -19,14 +19,23 @@ allowed-tools: Read, Bash, Glob, Grep, Task
    - Cross-reference each import against the truth file
    - Report any imports not found in the truth file
 
-4. **Code Review** (optional):
+4. **Unit Tests**: Run the project's test command (from CLAUDE.md) if configured
+   - Report failures with file paths and test names
+
+5. **Smoke Test**: Run the project's smoke test command (from CLAUDE.md) if configured
+   - Spawns the start command, waits for success/failure signals
+   - Reports runtime errors the type-checker cannot catch (constructor validation, asset resolution, missing required fields)
+
+6. **Code Review** (optional):
    - If the user requests a full review, spawn the `code-reviewer` agent on changed files
    - Report the reviewer's findings
 
-5. **Summary**: Print a pass/fail summary:
+7. **Summary**: Print a pass/fail summary:
    ```
-   Type-check: PASS
-   Lint: PASS (2 warnings)
-   Truth file: 1 unknown import
-   Review: Not requested (use /validate --review to include)
+   Type-check:  PASS
+   Lint:        PASS (2 warnings)
+   Truth file:  1 unknown import
+   Unit tests:  PASS (41 tests)
+   Smoke test:  PASS (server started)
+   Review:      Not requested (use /validate --review to include)
    ```

@@ -27,6 +27,7 @@
 - `codebase-maintenance.md` — [ALWAYS] Keep this file current
 - `coding-standards.md` — [ALWAYS] Project coding standards (customize after bootstrap)
 - `roadmap-discipline.md` — [ALWAYS] File ownership boundaries and escalation path for rules
+- `testing.md` — [ALWAYS] Test pyramid and testing rules (static → unit → smoke)
 
 ### `.claude/skills/` — Slash-Command Workflows
 - `bootstrap/SKILL.md` — `/bootstrap` — Initialize project from PRD

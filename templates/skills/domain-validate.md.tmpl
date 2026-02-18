@@ -19,7 +19,13 @@ allowed-tools: Read, Bash, Glob, Grep, Task
    - Cross-reference each import against `{{TRUTH_FILE}}`
    - Report any imports not found in the truth file
 
-4. **Code Review** (optional):
+4. **Unit Tests**: Run `{{TEST_CMD}}`
+   - Report failures with file paths and test names
+
+5. **Smoke Test**: Run `{{SMOKE_CMD}}` (if configured)
+   - Reports runtime errors the type-checker cannot catch
+
+6. **Code Review** (optional):
    - If the user requests a full review, spawn the `code-reviewer` agent on changed files
 
-5. **Summary**: Print a pass/fail summary
+7. **Summary**: Print a pass/fail summary
