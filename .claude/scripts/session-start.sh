@@ -23,6 +23,31 @@ cat << 'EOF'
 EOF
 
 # ============================================
+# Bootstrap status detection
+# ============================================
+if [ -f "PRD.md" ]; then
+  # Check if truth file exists (indicator that bootstrap has run)
+  TRUTH_FILES=$(find . -maxdepth 1 -name "*-truth.md" 2>/dev/null | wc -l)
+
+  # Check if CLAUDE.md still has template placeholders
+  HAS_PLACEHOLDERS=false
+  if grep -q "\[populated by bootstrap\]" CLAUDE.md 2>/dev/null; then
+    HAS_PLACEHOLDERS=true
+  fi
+
+  if [ "$TRUTH_FILES" -eq 0 ] && [ "$HAS_PLACEHOLDERS" = true ]; then
+    cat << 'BOOTSTRAP_EOF'
+
+### ⚠ Bootstrap Not Yet Run
+PRD.md exists but no domain-specific configuration was found.
+Run `/bootstrap` to generate domain-specific rules, agents, hooks, and truth file.
+If `/bootstrap` fails with "Unknown skill", see `scripts/bootstrap-manual.md` for fallback options.
+
+BOOTSTRAP_EOF
+  fi
+fi
+
+# ============================================
 # PROJECT-SPECIFIC FACTS (added by bootstrap)
 # Add critical SDK/framework facts below that
 # the AI commonly gets wrong:
