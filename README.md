@@ -26,11 +26,13 @@ This repo provides a complete `.claude/` configuration that implements a **three
 
 ## Quick Start
 
-> **Important workflow order:** Initialize your project first → Copy template → Write PRD → Run `/bootstrap`. The bootstrap agent needs your installed dependencies to locate type definitions and generate the truth file.
+> **Important workflow order:** Initialize your project first → Copy template → Write PRD → **Start a new Claude Code session** → Run `/bootstrap`. The bootstrap agent needs your installed dependencies to locate type definitions and generate the truth file.
 
-1. **Initialize your project first** — Set up your project using your framework's CLI (e.g., `hytopia init`, `npx create-next-app`, `cargo init`). The template should be applied *after* your project scaffolding exists.
+### Phase 1: Project Setup (in your terminal)
 
-2. **Clone this repo** and copy the infrastructure into your project:
+1. **Initialize your project** — Set up your project using your framework's CLI (e.g., `hytopia init`, `npx create-next-app`, `cargo init`). The template should be applied *after* your project scaffolding exists.
+
+2. **Clone this template** and copy the infrastructure into your project:
    ```bash
    git clone <this-repo-url> .claude-infra
    cp -r .claude-infra/.claude .
@@ -40,18 +42,61 @@ This repo provides a complete `.claude/` configuration that implements a **three
    cp -r .claude-infra/scripts .
    ```
 
-3. **Write your PRD** — Describe your product, tech stack, architecture, key entities, and risk areas. See `examples/` for format and detail level.
+3. **Write your PRD** — Describe your product, tech stack, architecture, key entities, and risk areas. Place it at your project root as `PRD.md`. See `examples/` for format and detail level.
 
-4. **Place PRD at project root** as `PRD.md`
+4. **(Optional) Verify setup** — Run the verification script to confirm files are in place:
+   ```bash
+   bash scripts/verify-setup.sh
+   ```
 
-5. **Run Claude Code** and invoke `/bootstrap`
+### Phase 2: Bootstrap (in a new Claude Code session)
 
-6. The bootstrap agent will:
+> **Critical:** Skills and hooks are loaded at session startup. If you copied the `.claude/` directory during an active session, those skills and hooks **will not be available** until you start a new session. Always start a fresh Claude Code session before running `/bootstrap`.
+
+5. **Start a new Claude Code session** in your project directory.
+
+6. **Run `/bootstrap`** — The bootstrap agent will:
    - Analyze your PRD
    - Generate domain-specific rules, agents, hooks, and skills
    - Auto-detect your SDK's type definition file (`.d.ts`, `.pyi`, etc.) and generate a truth file
    - Configure build/lint/test commands
    - Initialize memory with SDK-specific gotchas
+
+### Troubleshooting
+
+<details>
+<summary><strong><code>/bootstrap</code> fails with "Unknown skill: bootstrap"</strong></summary>
+
+This means the skill wasn't loaded at session startup. Common causes:
+
+1. **You didn't restart Claude Code** after copying the `.claude/` directory. Close your session and start a new one.
+2. **The `.claude/skills/bootstrap/SKILL.md` file wasn't copied correctly.** Run `bash scripts/verify-setup.sh` to check.
+
+**Manual fallback:** If you can't get the skill to load, paste this into Claude Code:
+
+```
+Read the PRD at PRD.md and the bootstrap orchestrator spec at .claude/agents/bootstrap-orchestrator.md.
+Follow the orchestrator's full workflow to generate domain-specific .claude configuration:
+Analysis → Rules → Agents → Hooks → Truth File → Skills → Memory → CLAUDE.md → CODEBASE_OVERVIEW.md
+```
+
+Alternatively, you can invoke the orchestrator directly as a Task agent:
+
+```
+Use the Task tool to spawn the bootstrap-orchestrator agent with this prompt:
+"Read the PRD at PRD.md and generate a complete domain-specific .claude configuration."
+```
+
+See `scripts/bootstrap-manual.md` for the full manual bootstrap guide.
+
+</details>
+
+<details>
+<summary><strong>Hooks aren't firing after setup</strong></summary>
+
+Hooks (like dangerous command blocking and post-edit type checking) are also loaded at session startup. If you copied `.claude/` during an active session, hooks won't be active until you restart. This is especially important during bootstrap — the safety net isn't protecting you until you're in a fresh session.
+
+</details>
 
 ## Directory Structure
 
