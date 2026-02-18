@@ -31,6 +31,30 @@ The bootstrap intentionally generates only universal rules + one SDK constraint 
 - Git
 - Project-specific build tools (configured during bootstrap)
 
+## What to Copy vs. What's Reference-Only
+
+This repo contains two categories of files:
+
+### Copy to your project
+These files are the actual infrastructure that powers your AI-assisted development:
+
+| Path | Purpose |
+|------|---------|
+| `.claude/` | Entire directory — agents, rules, skills, scripts, memory |
+| `CLAUDE.md` | Project-level instructions for Claude Code |
+| `CODEBASE_OVERVIEW.md` | File map (agents read this before modifying code) |
+| `ROADMAP.md` | Project status, milestones, decisions, open questions |
+| `scripts/` | Utility scripts (truth file generator) |
+
+### Do NOT copy (reference only)
+These files are template infrastructure — consumed by the bootstrap orchestrator or provided as examples. They should **not** be in your project:
+
+| Path | Purpose |
+|------|---------|
+| `examples/` | Sample PRDs showing expected format and detail level |
+| `templates/` | Scaffolding with `{{PLACEHOLDER}}` markers, used internally by bootstrap |
+| `README.md` | This file — documentation for the template repo itself |
+
 ## Quick Start
 
 > **Important workflow order:** Initialize your project first → Copy template → Write PRD → **Start a new Claude Code session** → Run `/bootstrap`. The bootstrap agent needs your installed dependencies to locate type definitions and generate the truth file.
@@ -42,14 +66,20 @@ The bootstrap intentionally generates only universal rules + one SDK constraint 
 2. **Clone this template** and copy the infrastructure into your project:
    ```bash
    git clone <this-repo-url> .claude-infra
-   cp -r .claude-infra/.claude .
-   cp .claude-infra/CLAUDE.md .
-   cp .claude-infra/CODEBASE_OVERVIEW.md .
-   cp -r .claude-infra/templates .
-   cp -r .claude-infra/scripts .
+   # Use the setup script (recommended)
+   bash .claude-infra/scripts/setup.sh /path/to/your/project
+
+   # Or copy manually — only these files:
+   cp -r .claude-infra/.claude /path/to/your/project/
+   cp .claude-infra/CLAUDE.md /path/to/your/project/
+   cp .claude-infra/CODEBASE_OVERVIEW.md /path/to/your/project/
+   cp .claude-infra/ROADMAP.md /path/to/your/project/
+   cp -r .claude-infra/scripts /path/to/your/project/
    ```
 
-3. **Write your PRD** — Describe your product, tech stack, architecture, key entities, and risk areas. Place it at your project root as `PRD.md`. See `examples/` for format and detail level.
+   **Do NOT copy** `examples/`, `templates/`, or `README.md` — they are reference material for the template repo.
+
+3. **Write your PRD** — Describe your product, tech stack, architecture, key entities, and risk areas. Place it at your project root as `PRD.md`. See `examples/` in this repo for format and detail level.
 
 4. **(Optional) Verify setup** — Run the verification script to confirm files are in place:
    ```bash
@@ -78,8 +108,8 @@ Each type of content has exactly one owner file. This prevents duplication and d
 
 | Content | Owned by | Read by |
 |---------|----------|---------|
-| Requirements (what to build) | `PRD.md` | agents, `/plan-feature` |
-| Status, milestones, decisions, open questions | `ROADMAP.md` | agents, `/status`, `/plan-feature` |
+| Requirements (what to build) | `PRD.md` | agents, `/plan`, `/plan-feature` |
+| Status, milestones, decisions, open questions | `ROADMAP.md` | agents, `/status`, `/plan`, `/milestone` |
 | Behavioral constraints (what NOT to do) | `.claude/rules/` | agents during implementation |
 | Cross-session learnings | `.claude/memory/MEMORY.md` | agents (auto-loaded first 200 lines) |
 | File structure & purposes | `CODEBASE_OVERVIEW.md` | agents before any file modification |
@@ -123,19 +153,24 @@ Hooks (like dangerous command blocking and post-edit type checking) are also loa
 ## Directory Structure
 
 ```
+# Copy these to your project:
 .claude/
   settings.json          # Permissions + hook definitions
   agents/                # Subagent definitions (orchestrator, reviewer, implementer, devops)
   rules/                 # Behavioral constraints (always-on globals + path-matched)
-  skills/                # Slash-command workflows (/bootstrap, /commit, /validate, /status, etc.)
+  skills/                # Slash-command workflows (/bootstrap, /commit, /validate, /plan, etc.)
   scripts/               # Hook scripts (pre-tool, post-edit, session lifecycle)
   memory/
     MEMORY.md            # Cross-session learnings (first 200 lines auto-loaded)
-
+CLAUDE.md                # Project-level instructions for Claude Code
+CODEBASE_OVERVIEW.md     # File map (agents read before modifying code)
 ROADMAP.md               # Project status, milestones, decisions, open questions
-templates/               # Scaffolding templates with {{PLACEHOLDER}} markers (used by bootstrap)
+scripts/                 # Utility scripts (truth file generator, setup script)
+
+# Reference only — do NOT copy:
+templates/               # Scaffolding with {{PLACEHOLDER}} markers (consumed by bootstrap)
 examples/                # Example PRDs showing expected input format
-scripts/                 # Utility scripts (truth file generator)
+README.md                # This file (template documentation)
 ```
 
 ## How It Works
@@ -186,7 +221,9 @@ The truth file is an auto-generated reference extracted from your SDK's type def
 After the initial bootstrap, refine your setup as you develop:
 
 - **Use `/status`** to check your current milestone, open questions, and recent activity
-- **Update ROADMAP.md** as you complete tasks, make decisions, and resolve questions
+- **Use `/plan`** to get a recommendation for what to work on next
+- **Use `/plan-feature`** to decompose a specific feature into implementation steps
+- **Use `/milestone`** to check off tasks, record decisions, and advance milestones in ROADMAP.md
 - **Add to memory** when you discover SDK gotchas or project patterns
 - **Promote to rules** when memory entries aren't being followed consistently — rules are earned through the escalation path, not pre-generated
 - **Add hooks** when rules aren't sufficient (deterministic enforcement needed)
@@ -201,6 +238,10 @@ After the initial bootstrap, refine your setup as you develop:
 | `/bootstrap` | Initialize project from PRD |
 | `/commit` | Validate and commit with conventional format |
 | `/validate` | Full validation pipeline (type-check + truth file + lint) |
-| `/plan-feature` | Decompose a feature into sequenced implementation steps |
+| `/plan` | Roadmap-level "what's next" — recommends the next task based on ROADMAP.md |
+| `/plan-feature` | Code-level decomposition — breaks a specific feature into sequenced steps |
+| `/milestone` | Update ROADMAP.md — check off tasks, record decisions, advance milestones |
 | `/review` | Trigger code-reviewer agent on recent changes |
 | `/status` | Show current milestone, activity, and open questions from ROADMAP.md |
+
+**Skill hierarchy:** `/plan` decides WHAT to work on next, `/plan-feature` decides HOW to implement it, `/milestone` records progress.

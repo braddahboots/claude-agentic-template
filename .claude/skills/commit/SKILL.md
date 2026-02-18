@@ -10,7 +10,8 @@ allowed-tools: Read, Bash, Glob, Grep, Task
 
 1. **Check status**: Run `git status` to see what's changed
 2. **Run validation**: Execute the project's validation command (check CLAUDE.md for the specific command)
-   - If validation fails, report errors and stop — do not commit broken code
+   - This should run type-check, lint, unit tests, and smoke test (all layers configured for the project)
+   - If any layer fails, report errors and stop — do not commit broken code
 3. **Stage changes**: Run `git add` for the relevant files
    - Only stage files related to the current task
    - If unrelated changes exist, warn the user

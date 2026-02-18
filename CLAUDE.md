@@ -13,8 +13,8 @@ Each type of content has exactly one owner. When information conflicts or you're
 
 | Content | Owned by | Read by |
 |---------|----------|---------|
-| Requirements (what to build) | `PRD.md` | agents, `/plan-feature` |
-| Status, milestones, decisions, open questions | `ROADMAP.md` | agents, `/status`, `/plan-feature` |
+| Requirements (what to build) | `PRD.md` | agents, `/plan`, `/plan-feature` |
+| Status, milestones, decisions, open questions | `ROADMAP.md` | agents, `/status`, `/plan`, `/milestone` |
 | Behavioral constraints (what NOT to do) | `.claude/rules/` | agents during implementation |
 | Cross-session learnings | `.claude/memory/MEMORY.md` | agents (auto-loaded first 200 lines) |
 | File structure & purposes | `CODEBASE_OVERVIEW.md` | agents before any file modification |
@@ -46,6 +46,14 @@ When information conflicts, resolve using this priority order:
 5. **Memory** (`.claude/memory/MEMORY.md`)
 6. **AI training knowledge** — lowest authority (may hallucinate)
 
+### Testing Model
+Three verification layers, each catching what the previous misses:
+1. **Static analysis** (type-check + truth file) — compile-time correctness
+2. **Unit tests** (mocked dependencies) — logic correctness
+3. **Smoke test** (real runtime) — runtime correctness
+
+All three run in the project's `validate` script and gate `/commit`.
+
 ### Scope Discipline
 - **Only modify files explicitly relevant to the current task**
 - **Never add features that weren't requested**
@@ -62,10 +70,14 @@ Before using any SDK/framework API:
 ## Available Skills
 - `/bootstrap` — Analyze a PRD and generate domain-specific .claude configuration
 - `/commit` — Stage, validate, and commit with conventional commit format
-- `/validate` — Run the full validation pipeline (type-check + truth-file cross-reference)
-- `/plan-feature` — Decompose a complex feature into sequenced implementation steps
+- `/validate` — Run the full validation pipeline (type-check, truth-file cross-reference, unit tests, smoke test)
+- `/plan` — Roadmap-level "what's next" — recommends the highest-priority task from ROADMAP.md
+- `/plan-feature` — Code-level decomposition — breaks a specific feature into sequenced steps
+- `/milestone` — Update ROADMAP.md — check off tasks, record decisions, advance milestones
 - `/review` — Trigger the code-reviewer agent on recent changes
 - `/status` — Show current milestone, recent activity, open questions from ROADMAP.md
+
+**Skill hierarchy:** `/plan` decides WHAT to work on next, `/plan-feature` decides HOW to implement it, `/milestone` records progress.
 
 ## Available Agents
 - `bootstrap-orchestrator` — Reads PRD, generates domain-specific agents/rules/hooks/skills

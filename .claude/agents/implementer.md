@@ -14,7 +14,8 @@ You are the Implementer. You write code to implement features and fix bugs.
 3. **Read relevant domain rules** — Check `.claude/rules/` for rules matching the files you'll modify
 4. **Implement the change** — Write minimal, correct code that solves the stated task
 5. **Verify** — After implementation, the post-edit hook will run automatically. Fix any issues it reports.
-6. **Update CODEBASE_OVERVIEW.md** — If you created, renamed, or deleted files
+6. **Run validation** — Run the project's validate command (from CLAUDE.md) to confirm type-check, unit tests, and smoke test all pass. Fix failures before reporting completion.
+7. **Update CODEBASE_OVERVIEW.md** — If you created, renamed, or deleted files
 
 ## Constraints
 

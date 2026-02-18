@@ -27,6 +27,8 @@ Read the PRD carefully and extract:
 
 Using the analysis, generate the following files. Use templates from `templates/` as starting points, replacing placeholders with domain-specific content.
 
+**Important:** The `templates/` and `examples/` directories are reference material for this template repo. They should NOT exist in the user's project. If you find them in the project root, do NOT read from or depend on them being present — they may not have been copied. Read templates from the `.claude-infra/templates/` clone directory if needed, or inline the content directly.
+
 ### Step 1: Generate Rules
 
 **CRITICAL: Do NOT create a rule file for every domain area in the PRD.** Over-generating rules front-loads implementation guidance before any code exists, duplicates the PRD, and creates drift risk. Rules are earned through the escalation path (memory → rules → hooks), not pre-generated.
@@ -107,16 +109,38 @@ If the project uses a typed SDK or framework:
 
 If the project doesn't use a typed SDK, skip this step and note in CLAUDE.md that the truth file pattern is not applicable.
 
-### Step 5: Generate Skills
+### Step 5: Configure Testing Infrastructure
 
-Adapt the slash-command skills:
+Set up the project's test layers. The goal is a single `validate` script that chains all verification layers.
 
-- `/commit` — Already universal, but configure the validation step for the project's build command
-- `/validate` — Configure for the project's type-checker, linter, and truth file
-- `/plan-feature` — Already universal
+1. **Unit test runner**: Detect or prompt for the project's test runner (e.g., Vitest, Jest, pytest, `cargo test`, `go test`). Create a minimal test config if one doesn't exist. Create the `tests/` directory convention.
+
+2. **Smoke test** (if the project has a start command): Generate a `scripts/smoke-test.js` (or equivalent) that:
+   - Spawns the project's start command
+   - Waits for a success signal on stdout (e.g., `Server running on port`, `listening on`, `ready`)
+   - Detects failure signals (e.g., `FATAL ERROR`, `Error:`, process exit before success)
+   - Has a safety-net timeout (not the primary mechanism)
+   - Skip this for libraries or projects with no runtime entry point.
+
+3. **Wire into validate script**: Ensure the project's `validate` command (e.g., in `package.json`, `Makefile`, `pyproject.toml`) chains: type-check → lint → unit tests → smoke test.
+
+4. **Add test/smoke commands to CLAUDE.md**: Document the test command and smoke test command in the Project-Specific Configuration section so other skills and agents can find them.
+
+### Step 6: Configure Skills
+
+Adapt the slash-command skills that need project-specific configuration:
+
+- `/commit` — Configure the validation step for the project's build command
+- `/validate` — Configure for the project's type-checker, linter, truth file, unit tests, and smoke test
 - `/review` — Trigger code-reviewer with project-specific review criteria
 
-### Step 6: Initialize Memory
+The following skills are already universal and need no changes:
+- `/plan` — Roadmap-level "what's next" (reads ROADMAP.md, recommends next task)
+- `/plan-feature` — Code-level decomposition (breaks a feature into implementation steps)
+- `/milestone` — Updates ROADMAP.md (the only skill that writes to it)
+- `/status` — Read-only project status pulse check
+
+### Step 7: Initialize Memory
 
 Create `.claude/memory/MEMORY.md` with:
 
@@ -127,7 +151,7 @@ Create `.claude/memory/MEMORY.md` with:
   - "Memory alone doesn't change behavior — escalate to rules, then hooks"
   - "Delete fabricated code, don't warn — leaving wrong code with comments doesn't work"
 
-### Step 7: Update CLAUDE.md
+### Step 8: Update CLAUDE.md
 
 Update the CLAUDE.md "Project-Specific Configuration" section with:
 - Tech stack details
@@ -136,7 +160,7 @@ Update the CLAUDE.md "Project-Specific Configuration" section with:
 - Key entities and architecture
 - The SDK rule generated (should be only one)
 
-### Step 8: Initialize ROADMAP.md
+### Step 9: Initialize ROADMAP.md
 
 Create `ROADMAP.md` at the project root with:
 - Current milestone (MVP or first milestone from PRD)
@@ -146,7 +170,7 @@ Create `ROADMAP.md` at the project root with:
 
 **Important:** Move any open questions or decision records OUT of rule files and INTO ROADMAP.md. Rules are for constraints only.
 
-### Step 9: Initialize CODEBASE_OVERVIEW.md
+### Step 10: Initialize CODEBASE_OVERVIEW.md
 
 Create `CODEBASE_OVERVIEW.md` with:
 - The current file structure

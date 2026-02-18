@@ -27,6 +27,7 @@
 - `codebase-maintenance.md` — [ALWAYS] Keep this file current
 - `coding-standards.md` — [ALWAYS] Project coding standards (customize after bootstrap)
 - `roadmap-discipline.md` — [ALWAYS] File ownership boundaries and escalation path for rules
+- `testing.md` — [ALWAYS] Test pyramid and testing rules (static → unit → smoke)
 
 ### `.claude/skills/` — Slash-Command Workflows
 - `bootstrap/SKILL.md` — `/bootstrap` — Initialize project from PRD
@@ -34,6 +35,8 @@
 - `validate/SKILL.md` — `/validate` — Full validation pipeline
 - `plan-feature/SKILL.md` — `/plan-feature` — Decompose features into steps
 - `review/SKILL.md` — `/review` — Trigger code-reviewer agent on recent changes
+- `plan/SKILL.md` — `/plan` — Roadmap-level "what's next" recommendation
+- `milestone/SKILL.md` — `/milestone` — Update ROADMAP.md (the only skill that writes to it)
 - `status/SKILL.md` — `/status` — Show current milestone, activity, and open questions
 
 ### `.claude/scripts/` — Hook Scripts (Deterministic)
@@ -55,6 +58,7 @@
 - `saas-api-prd.md` — SaaS platform example
 
 ## `scripts/` — Utility Scripts
+- `setup.sh` — Copies template infrastructure into a target project (excludes examples/ and templates/)
 - `generate-truth-file.sh` — Generates truth file from type definitions
 - `verify-setup.sh` — Verifies .claude infrastructure is properly set up (files, dirs, permissions, bootstrap status)
 - `bootstrap-manual.md` — Fallback guide for manual bootstrap when /bootstrap skill is unavailable
