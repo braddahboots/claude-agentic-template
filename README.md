@@ -12,7 +12,14 @@ This repo provides a complete `.claude/` configuration that implements a **three
 | **Rules** | `.claude/rules/` | Active instructions (always-on + path-matched) | Hallucination |
 | **Hooks** | `.claude/scripts/` | Deterministic shell scripts on lifecycle events | Scope creep |
 
-**Escalation path:** If an AI mistake happens once, add to memory. If it recurs, promote to a rule. If it's dangerous, enforce with a hook.
+**Escalation path — rules are earned, not pre-generated:**
+```
+AI mistake happens once       → add to MEMORY.md
+Same mistake recurs           → promote to a rule in .claude/rules/
+Mistake is dangerous/critical → enforce with a hook in .claude/scripts/
+```
+
+The bootstrap intentionally generates only universal rules + one SDK constraint file. Domain-specific rules emerge organically as patterns prove they need enforcement.
 
 ## Prerequisites
 
@@ -57,11 +64,26 @@ This repo provides a complete `.claude/` configuration that implements a **three
 
 6. **Run `/bootstrap`** — The bootstrap agent will:
    - Analyze your PRD
-   - Generate domain-specific rules, agents, hooks, and skills
+   - Generate universal rules + one SDK constraint file (not per-domain rules)
+   - Create domain-specific implementer agents
+   - Configure hooks for your build tools
    - Auto-detect your SDK's type definition file (`.d.ts`, `.pyi`, etc.) and generate a truth file
    - Configure build/lint/test commands
+   - Initialize `ROADMAP.md` with milestones, decisions, and open questions
    - Initialize memory with SDK-specific gotchas
 
+## File Ownership
+
+Each type of content has exactly one owner file. This prevents duplication and drift:
+
+| Content | Owned by | Read by |
+|---------|----------|---------|
+| Requirements (what to build) | `PRD.md` | agents, `/plan-feature` |
+| Status, milestones, decisions, open questions | `ROADMAP.md` | agents, `/status`, `/plan-feature` |
+| Behavioral constraints (what NOT to do) | `.claude/rules/` | agents during implementation |
+| Cross-session learnings | `.claude/memory/MEMORY.md` | agents (auto-loaded first 200 lines) |
+| File structure & purposes | `CODEBASE_OVERVIEW.md` | agents before any file modification |
+| SDK/framework API reference | `*-truth.md` | agents, post-edit hooks |
 ### Troubleshooting
 
 <details>
@@ -104,12 +126,13 @@ Hooks (like dangerous command blocking and post-edit type checking) are also loa
 .claude/
   settings.json          # Permissions + hook definitions
   agents/                # Subagent definitions (orchestrator, reviewer, implementer, devops)
-  rules/                 # Contextual instructions (always-on globals + path-matched domain rules)
-  skills/                # Slash-command workflows (/bootstrap, /commit, /validate, /plan-feature)
+  rules/                 # Behavioral constraints (always-on globals + path-matched)
+  skills/                # Slash-command workflows (/bootstrap, /commit, /validate, /status, etc.)
   scripts/               # Hook scripts (pre-tool, post-edit, session lifecycle)
   memory/
     MEMORY.md            # Cross-session learnings (first 200 lines auto-loaded)
 
+ROADMAP.md               # Project status, milestones, decisions, open questions
 templates/               # Scaffolding templates with {{PLACEHOLDER}} markers (used by bootstrap)
 examples/                # Example PRDs showing expected input format
 scripts/                 # Utility scripts (truth file generator)
@@ -122,11 +145,12 @@ scripts/                 # Utility scripts (truth file generator)
 ```
 PRD.md → /bootstrap → bootstrap-orchestrator agent
                           ├── Analyzes tech stack, domain, entities, risks
-                          ├── Generates domain-specific rules
+                          ├── Generates universal rules + ONE SDK constraint file
                           ├── Creates domain-specific implementer agents
                           ├── Configures hooks for your build tools
                           ├── Generates truth file from type definitions
                           ├── Initializes memory with SDK gotchas
+                          ├── Initializes ROADMAP.md (milestones, decisions, open questions)
                           └── Updates CLAUDE.md with project config
 ```
 
@@ -161,8 +185,10 @@ The truth file is an auto-generated reference extracted from your SDK's type def
 
 After the initial bootstrap, refine your setup as you develop:
 
+- **Use `/status`** to check your current milestone, open questions, and recent activity
+- **Update ROADMAP.md** as you complete tasks, make decisions, and resolve questions
 - **Add to memory** when you discover SDK gotchas or project patterns
-- **Promote to rules** when memory entries aren't being followed consistently
+- **Promote to rules** when memory entries aren't being followed consistently — rules are earned through the escalation path, not pre-generated
 - **Add hooks** when rules aren't sufficient (deterministic enforcement needed)
 - **Update the truth file** after SDK upgrades: `scripts/generate-truth-file.sh`
 - **Tune coding standards** in `.claude/rules/coding-standards.md`
@@ -177,3 +203,4 @@ After the initial bootstrap, refine your setup as you develop:
 | `/validate` | Full validation pipeline (type-check + truth file + lint) |
 | `/plan-feature` | Decompose a feature into sequenced implementation steps |
 | `/review` | Trigger code-reviewer agent on recent changes |
+| `/status` | Show current milestone, activity, and open questions from ROADMAP.md |
