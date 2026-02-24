@@ -38,6 +38,7 @@
 - `plan/SKILL.md` — `/plan` — Roadmap-level "what's next" recommendation
 - `milestone/SKILL.md` — `/milestone` — Update ROADMAP.md (the only skill that writes to it)
 - `status/SKILL.md` — `/status` — Show current milestone, activity, and open questions
+- `feedback/SKILL.md` — `/feedback` — Intake feedback, triage, and route to correct file (template-repo only, excluded from setup.sh)
 
 ### `.claude/scripts/` — Hook Scripts (Deterministic)
 - `block-dangerous-commands.sh` — [PreToolUse] Blocks rm -rf, force push, etc.

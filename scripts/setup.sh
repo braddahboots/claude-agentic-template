@@ -47,7 +47,10 @@ if [ -d "$TARGET_DIR/.claude" ]; then
   echo "Warning: $TARGET_DIR/.claude/ already exists. Merging (existing files will be overwritten)."
 fi
 cp -r "$TEMPLATE_DIR/.claude" "$TARGET_DIR/"
-echo "  Copied .claude/"
+
+# Remove template-repo-only skills (not intended for target projects)
+rm -rf "$TARGET_DIR/.claude/skills/feedback"
+echo "  Copied .claude/ (excluded template-repo-only: feedback)"
 
 # Copy root files
 for file in CLAUDE.md CODEBASE_OVERVIEW.md ROADMAP.md; do
@@ -72,6 +75,7 @@ echo "  2. Write your PRD as PRD.md"
 echo "  3. Run Claude Code and invoke /bootstrap"
 echo ""
 echo "Files NOT copied (reference only — stay in the template repo):"
-echo "  examples/   — Sample PRDs for format reference"
-echo "  templates/  — Bootstrap scaffolding (consumed internally)"
-echo "  README.md   — Template documentation"
+echo "  examples/           — Sample PRDs for format reference"
+echo "  templates/          — Bootstrap scaffolding (consumed internally)"
+echo "  README.md           — Template documentation"
+echo "  skills/feedback/    — Template-repo feedback intake skill"
