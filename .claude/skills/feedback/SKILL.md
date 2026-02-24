@@ -10,7 +10,28 @@ Takes raw feedback and determines where it belongs in the project's information 
 
 ## Input
 
-Paste the feedback as `$ARGUMENTS`. Can be free-form text — a review comment, a lesson learned, a suggestion, a bug report, etc.
+Paste the feedback as `$ARGUMENTS`. Can be any length — a one-liner, a bullet list, or a full post-mortem document.
+
+## Handling Variable-Length Input
+
+Feedback varies from a single sentence to a structured post-mortem with many items. Adapt the workflow:
+
+### Single item (1-2 paragraphs)
+Process directly — full analysis, routing, and proposed change in one pass.
+
+### Multiple items (list, post-mortem, review with several points)
+1. **Triage all items first** — read everything, classify each item in a summary table
+2. **Present the triage table** with priority, classification, routing, and effort for each
+3. **Ask the user** which items to proceed with (all, a subset, or one at a time)
+4. **Process approved items** in priority order, presenting proposed changes for each
+
+The triage table format:
+
+```
+| # | Item | Classification | Route | Effort | Already Exists? |
+|---|------|---------------|-------|--------|-----------------|
+| 1 | [short name] | [type] | [file] | S/M/L | No / Partial / Yes |
+```
 
 ## Steps
 
@@ -20,7 +41,7 @@ Paste the feedback as `$ARGUMENTS`. Can be free-form text — a review comment, 
    - `ROADMAP.md` — current status, open questions, decisions
    - `CLAUDE.md` — file ownership table and escalation path
 
-2. **Analyze the feedback** by answering these questions:
+2. **Analyze the feedback** — for each item, answer:
    - **What type is it?** (learning, constraint, feature request, process improvement, bug report, irrelevant)
    - **Is it already captured?** Check MEMORY.md, rules, and ROADMAP.md for duplicates or overlapping content
    - **Is it viable?** Does it apply to this project/template? Is it actionable?
@@ -34,12 +55,13 @@ Paste the feedback as `$ARGUMENTS`. Can be free-form text — a review comment, 
    | Recurring pattern / behavioral constraint | `.claude/rules/` | Create or update a rule file |
    | Feature request or requirement | `PRD.md` | **Flag only** — present to user, do not modify PRD.md |
    | Status update, decision, or open question | `ROADMAP.md` | **Flag only** — recommend using `/milestone` to update |
-   | Process or template improvement | `CLAUDE.md` | **Flag only** — present to user for manual update |
+   | Process or template improvement | Direct edit | Edit the relevant infrastructure file (scripts, skills, etc.) |
    | Already captured | None | Report where it already exists |
    | Not relevant or not actionable | None | Explain why and skip |
 
-4. **Present the analysis** before making any changes:
+4. **Present the analysis** before making any changes.
 
+   For single items:
    ```
    ## Feedback Analysis
 
@@ -59,9 +81,12 @@ Paste the feedback as `$ARGUMENTS`. Can be free-form text — a review comment, 
    [Show the exact text that will be added or changed]
    ```
 
+   For multiple items: use the triage table (see above), then expand details per item as the user approves them.
+
 5. **Wait for user confirmation** before applying changes. If the user approves:
    - For MEMORY.md: Append to the appropriate section using Edit
    - For rules: Create a new file or append to an existing rule using Write/Edit
+   - For infrastructure (scripts, skills, hooks): Edit the file directly
    - For PRD.md / ROADMAP.md / CLAUDE.md: Remind the user to use the appropriate skill or make the change manually
 
 6. **Escalation check** — After adding to MEMORY.md, check if similar learnings already exist there:
@@ -77,4 +102,3 @@ Paste the feedback as `$ARGUMENTS`. Can be free-form text — a review comment, 
 - **Always present analysis before writing** — no silent changes
 - **Follow the escalation path** — default to MEMORY.md unless there's clear justification for a rule
 - **Reject vague feedback** — if the feedback isn't specific enough to act on, ask for clarification rather than guessing
-- **One feedback item per invocation** — if the input contains multiple items, process only the first and ask the user to invoke again for the rest
